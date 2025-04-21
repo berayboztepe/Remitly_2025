@@ -123,7 +123,23 @@ Validation is strict and enforced through Pydantic and schema constraints:
 - `isHeadquarter`: Must be boolean
 - Duplicate SWIFT codes return 400 with clear message
 
-`swiftCode` format:
+### ❗ Error Handling
+
+- If a required field is missing (e.g. `bankName`), the API returns:
+  - **422 Unprocessable Entity** with a descriptive validation error.
+
+- If a SWIFT code format is invalid (e.g. too short or non-alphanumeric), the API returns:
+  - **422 Unprocessable Entity** with a field-level validation message.
+
+- If a duplicate SWIFT code is submitted (already exists in DB), the API returns:
+  - **400 Bad Request** with message: `"SWIFT code already exists."`
+
+- If a SWIFT code is queried or deleted and it does not exist in the database, the API returns:
+  - **404 Not Found** with message: `"SWIFT code not found"` (e.g. `bankName`)
+
+---
+
+`swiftCode` Format Reference:
 
 | Part         | Length | Description                          |
 |--------------|--------|--------------------------------------|
@@ -167,7 +183,8 @@ psql -h localhost -p 5432 -U postgres -d swiftdb
 - Excel file parsed on container startup if located in `data/`
 - PostgreSQL data persisted with named volume (`pgdata`)
 
-Please verify if the database loaded properly. If the data is missing, there may be an issue with reading or parsing the Excel file during startup. Check the container logs to begin troubleshooting.
+**Important:** Please verify if the database loaded properly. If the data is missing, there may be an issue with reading or parsing the Excel file during startup. Check the container logs to begin troubleshooting.
+
 ---
 
 ## ⚙️ Dev Tips
